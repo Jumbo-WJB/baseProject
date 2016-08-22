@@ -1,5 +1,19 @@
 package com.base.service.impl;
- 
+
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
+
+import com.base.persistence.Test;
+import com.base.service.HomeService;
+import com.base.service.repository.TestMapper;
+
 @Service
 public class HomeServiceImpl  implements HomeService {
 	@Autowired
