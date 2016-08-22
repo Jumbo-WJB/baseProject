@@ -14,7 +14,7 @@
     <import resource="./redis-context.xml"/>
     <import resource="./mongodb.xml"/>
       <!-- 自动扫描 -->  
-    <context:component-scan base-package="com.tr.ihome" />  
+    <context:component-scan base-package="com.base" />  
     <mvc:annotation-driven />
     <!--避免IE执行AJAX时，返回JSON出现下载文件 -->  
     <bean id="mappingJacksonHttpMessageConverter"  
