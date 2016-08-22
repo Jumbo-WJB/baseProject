@@ -1,8 +1,8 @@
-package com.tr.ihome.service.repository;
+package com.base.service.repository;
 
 import java.util.List;
 
-import com.tr.ihome.persistence.Test;
+import com.base.persistence.Test;
 
 /**
  * 
