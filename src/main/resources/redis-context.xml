@@ -45,20 +45,20 @@ http://www.springframework.org/schema/redis/spring-redis-1.0.xsd">
 				class="org.springframework.data.redis.serializer.StringRedisSerializer" />
 		</property>
 	</bean>
-	  <bean id="listener" class="com.tr.ihome.service.RedisMessageListenerService" />
+	  <bean id="listener" class="com.base.service.RedisMessageListenerService" />
 
-	<redis:listener-container connection-factory="jedisConnectionFactory">
-		<!-- the method attribute can be skipped as the default method name is 
-			"handleMessage" -->
-			<!-- topic代表监听的通道，是一个正规匹配 -->
+<!-- 	<redis:listener-container connection-factory="jedisConnectionFactory">
+		the method attribute can be skipped as the default method name is 
+			"handleMessage"
+			topic代表监听的通道，是一个正规匹配
 		<redis:listener ref="listener" method="handleMessage"
 			topic="*" />
 	</redis:listener-container>
 	<redis:listener-container connection-factory="jedisConnectionFactory">
-		<!-- the method attribute can be skipped as the default method name is 
-			"handleMessage" -->
-			<!-- topic代表监听的通道，是一个正规匹配 -->
+		the method attribute can be skipped as the default method name is 
+			"handleMessage"
+			topic代表监听的通道，是一个正规匹配
 		<redis:listener ref="listener" method="handleMessagejava"
 			topic="*java" />
-	</redis:listener-container>
+	</redis:listener-container> -->
 </beans>
