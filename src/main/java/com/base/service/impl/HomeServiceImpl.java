@@ -44,7 +44,11 @@ public class HomeServiceImpl  implements HomeService {
 		 System.out.println(">>>>into service");
 		 List<Test> list=testMapper.showindex();
 		 System.out.println(list);*/
-		 testMapper.updateshow();
+		List<Test> list= testMapper.showindex();
+		for(Test temp:list){
+			System.out.println(temp.getSname());
+		}
+		System.out.println("¡·¡·¡·¡·¡·"+list);
 		// System.out.println(0/0);
 		 testMapper.updateindex();
 		 System.out.println("SUCCESS");

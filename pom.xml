@@ -21,6 +21,7 @@
         <mvn.compiler.version>3.3</mvn.compiler.version>
         <spring.redis.version>1.3.0.RELEASE</spring.redis.version>
         <jedis.version>2.4.2</jedis.version>
+         <pagehelper.version>3.6.0</pagehelper.version>  
     </properties>  
   
     <dependencies>  
@@ -193,6 +194,13 @@
 			<version>1.2.0.RELEASE</version>
 		</dependency>
 		<!-- mongodb end -->
+		 <!-- pageHelper begin -->  
+        <dependency>  
+            <groupId>com.github.pagehelper</groupId>  
+            <artifactId>pagehelper</artifactId>  
+            <version>${pagehelper.version}</version>  
+        </dependency>  
+        <!-- pageHelper end -->  
     </dependencies>  
     <build>
 		<pluginManagement>

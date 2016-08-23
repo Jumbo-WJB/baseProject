@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.base.service.HomeService;
+import com.github.pagehelper.PageHelper;
 
 @Controller
 @RequestMapping(value="/home")
@@ -17,6 +18,7 @@ public class HomeController {
 	public String index(){
       System.out.println(">>>>>>show");
       LOG.info("in to log{},log info:{}","YES","showindex");
+      PageHelper.startPage(1, 3);
       homeService.showindexs();
        return "ok";	
     }
