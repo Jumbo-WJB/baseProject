@@ -193,7 +193,6 @@
 			<version>1.2.0.RELEASE</version>
 		</dependency>
 		<!-- mongodb end -->
-          
     </dependencies>  
     <build>
 		<pluginManagement>
