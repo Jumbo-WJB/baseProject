@@ -5,6 +5,18 @@ package com.base.util.interceptor;
 * @Description: 用于将%和_过滤为/%/_ escape '/'
 * @author LIUYUEFENG559
 * @date 2016年6月9日 上午10:58:58
+*   * XML的com.github.pagehelper.PageHelper-plugins-array 中增加下面的配置
+    * <bean
+                    class="com.pingan.haofang.mfts.web.interceptor.MyBatisEscapeInterceptor">
+                    <property name="properties">
+                        <value>
+                            dialect=mysql
+                            pageSqlId=select.*
+                            exampleDialect=exampleMysql
+                            examplePageSqlId=selectByExample
+                        </value>
+                    </property>
+                </bean>
 */
 @Intercepts({
         @Signature(type = StatementHandler.class, method = "prepare", args = {
