@@ -3,11 +3,11 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
 	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	  <modelVersion>4.0.0</modelVersion>
-  <groupId>SMVCM</groupId>
-  <artifactId>SMVCM</artifactId>
+  <groupId>baseProject</groupId>
+  <artifactId>baseProject</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  <name>SMVCM</name>
-  <description>SMVCM</description>
+  <name>baseProject</name>
+  <description>baseProject</description>
   <packaging>war</packaging>
   <properties>  
         <!-- spring版本号 -->  
