@@ -1,0 +1,343 @@
+/**
+ * 小额提现审核controller
+ * 
+ * @author 作者 :liu.li
+ * @version 创建时间：2016年4月11日 上午10:29:32 类说明
+ */
+@Controller
+@RequestMapping("/presentAudit")
+public class ExcelTest {
+    private static final int AUDISSTATUSID = 2;
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(PresentAuditController.class);
+
+    @Autowired
+    private PresentAuditService presentAuditService;
+    @Autowired
+    Mapper mapper;
+    public void setPresentAuditService(
+            PresentAuditService presentAuditService) {
+        this.presentAuditService = presentAuditService;
+    }
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    public void setJdbcTemplate(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+    /**
+     * 
+     * selectAll:(财务审核信息展示).
+     * 
+     * @author liu.li
+     * @param paf
+     * @param request
+     * @return
+     * @since JDK 1.7
+     */
+    @RequestMapping(value = "/show")
+    public ModelAndView selectAll(@ModelAttribute("paf") PresentAuditForm paf) {
+        LOGGER.info("into selectAll");
+        // 定义查询Map
+        // 使用BeanToMap转换参数
+        paf.setiPageSize(5);
+        Map<String, Object> map = BeanCopyMapUtil.transBeanToMap(paf);
+        if (StringUtils.isNotEmpty(paf.getIdatatimeBegin())) {
+            map.put("createdBegintime", DateUtil.getIntFrDate(
+                    paf.getIdatatimeBegin(), DateUtil.SHORTFMT10));
+        }
+        if (StringUtils.isNotEmpty(paf.getIdatatimeEnd())) {
+            map.put("createdEndtime", DateUtil
+                    .getIntFrDate(paf.getIdatatimeEnd(), DateUtil.SHORTFMT10));
+        }
+        List<PresentAuditEntity> list = presentAuditService
+                .selectByParameter(map);
+        // 定义返回的List
+        List<PresentAuditForm> resList = new ArrayList<PresentAuditForm>();
+        // 将List中的内容取出来，放在返回的List中
+        for (PresentAuditEntity pae : list) {
+            PresentAuditForm tpa = new PresentAuditForm();
+            LOGGER.info("mapper.map Bean直接内容复制");
+            tpa = mapper.map(pae, PresentAuditForm.class);// 使用Dozer Bean直接内容复制
+            // 特殊字段转换单独处理
+            if (null != pae.getiAmount()) {
+            tpa.setiAmount(new BigDecimal(pae.getiAmount())
+                    .divide(new BigDecimal(100)));
+            }
+            if (null != pae.getiDataTime()) {
+            tpa.setiDataTime(DateUtil.getDateFrInt(pae.getiDataTime()));
+            }
+            tpa.setiAuditStatus(pae.getiAuditStatus());
+            resList.add(tpa);
+        }
+        // 装载分页数据
+        PageInfo<PresentAuditEntity> pageInfo = new PageInfo<>(list);
+        // 定义返回的Model
+        ModelAndView mav = new ModelAndView("presentaudit/showInfo");
+        mav.addObject("listForm", resList);
+        mav.addObject("pageInfo", pageInfo);
+        mav.addObject("content", "内容如下");
+        mav.addObject("paf", paf);
+        LOGGER.info("end selectAll");
+        return mav;
+    }
+
+    /**
+     * 
+     * selectByParameter:(Excel下载-Java反射机制实现).
+     * 
+     * @author liu.li
+     * @param httpServletRequest
+     * @param httpServletResponse
+     * @return
+     * @since JDK 1.7
+     */
+    @RequestMapping(value = "/downexcel")
+    public void selectByParameter(@ModelAttribute("paf") PresentAuditForm paf,
+            HttpServletResponse httpServletResponse) {
+        LOGGER.info("Excel导出");
+        // 定义查询的Map
+        Map<String, Object> map = BeanCopyMapUtil.transBeanToMap(paf);
+        if (StringUtils.isNotEmpty(paf.getIdatatimeBegin())) {
+            map.put("createdBegintime", DateUtil.getIntFrDate(
+                    paf.getIdatatimeBegin(), DateUtil.SHORTFMT10));
+        }
+        if (StringUtils.isNotEmpty(paf.getIdatatimeEnd())) {
+            map.put("createdEndtime", DateUtil
+                    .getIntFrDate(paf.getIdatatimeEnd(), DateUtil.SHORTFMT10));
+        }
+        // 调用查询的方法
+        List<PresentAuditEntity> list = presentAuditService
+                .selectByParameter(map);
+        List<PresentAuditForm> resList = new ArrayList<PresentAuditForm>();
+        // 查询的List转成结果集List
+        for (PresentAuditEntity pae : list) {
+            PresentAuditForm tpa = new PresentAuditForm();
+            if (null != pae.getiAmount()) {
+            tpa.setiAmount(new BigDecimal(pae.getiAmount())
+                    .divide(new BigDecimal(100)));
+            }
+            tpa.setiAutoId(pae.getiAutoId());
+            tpa.setiUserNumber(pae.getiUserNumber());
+            if (null != pae.getiDataTime()) {
+            tpa.setiDataTime(DateUtil.getDateFrInt(pae.getiDataTime()));
+            }
+            tpa.setiAuditStatus(pae.getiAuditStatus());
+            resList.add(tpa);
+        }
+        // Excel begin
+        String sheetName = "小额提现申请记录";
+        String[] columnArray = { "提现流水号", "提现金额", "提现申请时间", "状态" };
+        String[] keyArray = { "iAutoId", "iAmount", "iDataTime",
+                "iAuditStatus" };
+        ExcelUtilByPoi<PresentAuditForm> exportUtils = new ExcelUtilByPoi<PresentAuditForm>();
+        exportUtils.generateWorkbook(resList, sheetName, columnArray, keyArray,
+                "小额提现", httpServletResponse, ExcelUtilByPoi.xlsx);
+        LOGGER.info("Excel导出完成");
+    }
+
+
+    /**
+     * 展示明细页面
+    * @Title: showItem 
+    * @param httpServletRequest
+    * @return
+    * @throws
+     */
+    @RequestMapping(value = "/item")
+    public ModelAndView showItem() {
+        ModelAndView mav = new ModelAndView("presentaudit/showItem");
+        return mav;
+    }
+
+    /**
+     * ajax请求返回json格式数据对象
+    * @Title: showItemByJson 
+    * @param httpServletRequest
+    * @return
+    * @throws
+     */
+    @RequestMapping(value = "showItemJson", method = RequestMethod.GET)
+    @ResponseBody
+    public PresentAuditForm showItemByJson(
+            HttpServletRequest httpServletRequest) {
+        LOGGER.info("showItemByJson");
+        if (StringUtils.isBlank(httpServletRequest.getParameter("iautoid"))) {
+            LOGGER.error("iautoid is null");
+            return null;
+        }
+        // 根据key查询单条记录
+        String iauditid = httpServletRequest.getParameter("iautoid");
+        PresentAuditEntity presentAuditEntity = presentAuditService.selectByKey(
+Integer.parseInt(iauditid));
+        PresentAuditForm paf = new PresentAuditForm();
+        if (null != presentAuditEntity.getiAmount()) {
+            paf.setiAmount(new BigDecimal(presentAuditEntity.getiAmount())
+                    .divide(new BigDecimal(100)));
+        }
+        paf.setiAutoId(presentAuditEntity.getiAutoId());
+        paf.setiUserNumber(presentAuditEntity.getiUserNumber());
+        if (null != presentAuditEntity.getiDataTime()) {
+        paf.setiDataTime(
+                DateUtil.getDateFrInt(presentAuditEntity.getiDataTime()));
+        }
+        paf.setiAuditStatus(presentAuditEntity.getiAuditStatus());
+        LOGGER.info("return showItemByJson");
+        return paf;
+    }
+
+    @RequestMapping(value = "auditupdate", method = RequestMethod.GET)
+    @ResponseBody
+    public PresentAuditForm update(HttpServletRequest httpServletRequest) {
+        LOGGER.info("update begin..");
+        if (StringUtils.isBlank(httpServletRequest.getParameter("iautoid"))) {
+            LOGGER.error("iautoid is null");
+            return null;
+        }
+        PresentAuditEntity pae = new PresentAuditEntity();
+        pae.setiAutoId(
+                Integer.parseInt(httpServletRequest.getParameter("iautoid")));
+        pae.setiUpdateTime(DateUtil.getNowDate());
+        pae.setiAuditStatus(AUDISSTATUSID);// 修改状态为审核通过
+        int res = presentAuditService.update(pae);
+        PresentAuditForm paf = new PresentAuditForm();
+        paf.setiAuditStatus(res);
+        LOGGER.info("update end");
+        return paf;
+    }
+
+    /**
+     * 根据条件做批量更新下操作
+    * @Title: updatepl 
+    * @param httpServletRequest
+    * @return
+    * @throws
+     */
+    @RequestMapping(value = "updatepl", method = RequestMethod.GET)
+    @ResponseBody
+    public PresentAuditForm updatepl(HttpServletRequest httpServletRequest) {
+        if (StringUtils.isBlank(httpServletRequest.getParameter("iautoid"))) {
+            LOGGER.error("iautoid is null");
+            return null;
+        }
+        String str = httpServletRequest.getParameter("iautoid");
+        LOGGER.info("批量审核 iautoid Array：" + str);
+        int res = 0;
+        if (!StringUtils.isBlank(str)) {
+            Map<String, Object> map = new HashMap<String, Object>();
+            map.put("iAuditStatus", AUDISSTATUSID);
+            map.put("iUpdateTime", DateUtil.getNowDate());
+            map.put("iAutoId", str.split(",")); // where 条件中的in参数为数组
+            res = presentAuditService.updatepl(map);
+        }
+        PresentAuditForm paf = new PresentAuditForm();
+        paf.setiAuditStatus(res);
+        LOGGER.info("批量审核结束");
+        return paf;
+    }
+
+    /**
+     * 展示Excel上传页面
+    * @Title: showupload 
+    * @return
+    * @throws
+     */
+    @RequestMapping(value = "uploadexcel")
+    public ModelAndView showupload() {
+        return new ModelAndView("presentaudit/uploadexcel");
+    }
+
+    /**
+     * 上传Excel并读取
+    * @Title: upload2 
+    * @param request
+    * @param response
+    * @return
+    * @throws IllegalStateException
+    * @throws IOException
+    * @throws
+     */
+    @RequestMapping("/upload2")
+    public ModelAndView upload2(HttpServletRequest request)
+                    throws IllegalStateException, IOException {
+        //调用文件上传的方法begin
+        try {
+            // 此处被注释掉的内容为手动配置模板的写法
+           /* String[] columnArray = { "提现流水号", "提现金额", "提现申请时间", "状态" };
+            String[] keyArray = { "iAutoId", "iAmount", "iDataTime",
+                    "iAuditStatus" };
+            ExcelModel em = new ExcelModel("sss好的");
+            List<String> sheetName = new ArrayList<String>();// sheet页
+            sheetName.add("小额提现申请记录");
+            em.setSheetName(sheetName);
+            Map<String, Integer> startRowNum = new HashMap<String, Integer>();// 起始行
+            startRowNum.put("小额提现申请记录", 1);
+            em.setStartRowNum(startRowNum);
+            Map<String, Map<Integer, String>> sheetcolume = new HashMap<String, Map<Integer, String>>();
+            Map<Integer, String> colume = new HashMap<Integer, String>();
+            for (int i = 0; i < keyArray.length; i++) {
+                colume.put(i, keyArray[i]);
+            }
+            sheetcolume.put("小额提现申请记录", colume);
+            em.setSheetColumeName(sheetcolume);*/
+            //
+            LOGGER.info("读取文件开始...");
+            UploadUtil uploadUtil = new UploadUtil();
+            // String path = uploadUtil.readUploadFiles(request); //
+            // 上传文件并将文件保存在服务器本地 单个文件
+            Map<String, String> readFiles = uploadUtil
+                    .readUploadManyFiles(request); // 上传文件并将文件保存在服务器本地，用于多文件同时上传的情况
+            LOGGER.info("读取文件完成");
+
+            Map<String, List<Map<String, Object>>> excellistMap = new HashMap<String, List<Map<String, Object>>>(); // 结果集合
+
+            for (String key : readFiles.keySet()) { // 根据上传的返回结果去读对应的<文件名，路径>
+                List<Map<String, Object>> tempList = new ArrayList<Map<String, Object>>();
+                LOGGER.info("去数据库中读取配置信息开始...");
+                ExcelModel loadExcelModel = LoadExcelModel
+                        .queryAllExcelConfigBySingleFile(jdbcTemplate, key); // 读取一个文件下面的信息
+                                                                             // LOGGER.info("读取数据库配置信息结束");
+
+                LOGGER.info("读取根据配置读取Excel文件内容开始....");
+                tempList = ExcelReadUtil.readExcel(readFiles.get(key),
+                        loadExcelModel);// 去读存在的文件 LOGGER.info("读取Excel内容结束");
+                excellistMap.put(key, tempList); // 把一个文件的List放入对应的Map中
+
+            }
+
+            LOGGER.info("读取的Excel结果封装为List<Map>，转换成List<Bean>开始");
+            List<PresentAuditEntity> lastlist = new ArrayList<PresentAuditEntity>();
+            /*
+             * for (Map<String, Object> map : excellist) { PresentAuditEntity
+             * pae = new PresentAuditEntity();
+             * BeanCopyMapUtil.transMapToBean(map, pae); lastlist.add(pae); }
+             */
+
+            LOGGER.info("转换List<Bean>结束");
+            LOGGER.info("file upload end");
+        } catch (Exception e) {
+            LOGGER.error("upolad", e);
+        }
+        //end
+        return new ModelAndView("presentaudit/uploadexcel");
+    }
+
+    /**
+     * 二进制方式上传文件
+    * @Title: batyfileupload 
+    * @param files
+    * @param request
+    * @return
+    * @throws
+     */
+    @RequestMapping("/upload")
+    public ModelAndView batyfileupload(
+            @RequestParam("file") MultipartFile[] files,
+            HttpServletRequest request) {
+        UploadUtil uploadUtil = new UploadUtil();
+        Map<String, String> readFiles = uploadUtil.fileByteUpload(files,
+                request);
+        return new ModelAndView("presentaudit/uploadexcel");
+    }
+}
