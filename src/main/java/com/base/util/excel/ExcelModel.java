@@ -1,13 +1,12 @@
-
+package com.base.util.excel;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 文件导入的模板
-* @ClassName: ExcelModel 
-* @Description: TODO(这里用一句话描述这个类的作用) 
+ * 鏂囦欢瀵煎叆鐨勬ā鏉�* @ClassName: ExcelModel 
+* @Description: TODO(杩欓噷鐢ㄤ竴鍙ヨ瘽鎻忚堪杩欎釜绫荤殑浣滅敤) 
 * @author liu.li 
-* @date 2016年4月27日 下午5:08:39
+* @date 2016骞�鏈�7鏃�涓嬪崍5:08:39
  */
 public class ExcelModel {
     ExcelModel() {
@@ -17,13 +16,13 @@ public class ExcelModel {
         this.fileName = fileName;
     }
 
-    // Excel的文件名
+    // Excel鐨勬枃浠跺悕
     private String fileName;
-    // Sheet页的名
+    // Sheet椤电殑鍚�    
     private List<String> sheetName;
-    // 每个sheet页的起始行
+    // 姣忎釜sheet椤电殑璧峰琛�   
     private Map<String, Integer> startRowNum;
-    // 每个sheet页对应的列的字段
+    // 姣忎釜sheet椤靛搴旂殑鍒楃殑瀛楁
     private Map<String, Map<Integer, String>> sheetColumeName;
 
     public String getFileName() {
